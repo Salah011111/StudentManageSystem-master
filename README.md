@@ -1,0 +1,2 @@
+# StudentManageSystem
+利用Springboot、bootstrap、mybatis做的简单学生管理系统

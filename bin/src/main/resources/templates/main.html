@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<!--<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>-->
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<!-- bootstrap-table -->
+<link href="https://cdn.bootcss.com/bootstrap-table/1.14.2/bootstrap-table.min.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/bootstrap-table/1.14.2/bootstrap-table.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-table/1.14.2/locale/bootstrap-table-zh-CN.min.js"></script>
+
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>学生管理系统</title>
+</head>
+<body >
+<!--网页头部导航栏-->
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">学生管理系统</a>
+        </div>
+
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><p th:text="'用户名:'+${user.username}"/></li>
+                <li><a href="/login">注销</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!--这里是网格分割-->
+<div class="container-fluid">
+    <div class="row">
+        <!--左侧边栏-->
+        <div class="col-md-2 sidebar" >
+            <ul class="nav nav-sidebar">
+                <!--一级菜单-->
+                <li><a href="#student_management"data-toggle="collapse">学生管理</a></li>
+                <!--二级菜单-->
+                <!-- 注意一级菜单中<a>标签内的href="#……"里面的内容要与二级菜单中<ul>标签内的id="……"里面的内容一致 -->
+                <ul id="student_management"class="nav nav-list collapse menu-second">
+                    <li><a onclick="showAtRight('stu_m')">学生名单</a></li>
+                </ul>
+
+                <li><a href="#score_management" data-toggle="collapse">成绩管理</a> </li>
+                    <ul id="score_management"class="nav nav-list collapse menu-second">
+                    <li><a onclick="showAtRight('sco_m')">成绩表</a></li>
+                </ul>
+
+                <li><a href="#course_management" data-toggle="collapse">课程管理</a> </li>
+                    <ul id="course_management"class="nav nav-list collapse menu-second">
+                    <li><a onclick="showAtRight('cou_m')" >课程表</a></li>
+                </ul>
+
+            </ul>
+            <ul class="nav nav-sidebar">
+            </ul>
+        </div>
+        <!--右边界面-->
+        <div class="col-md-10 main">
+            <!--用于显示左边内容界面-->
+
+            <div id="content">
+                <h4>
+                    <strong>使用指南：</strong>
+                    <br><br>点击左侧菜单选择加载项
+                </h4>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script type="text/javascript">
+    /*
+        * 解决ajax返回的页面中含有javascript的办法：
+        * 把xmlHttp.responseText中的脚本都抽取出来，不管AJAX加载的HTML包含多少个脚本块，我们对找出来的脚本块都调用eval方法执行它即可
+        */
+    function executeScript(html)
+    {
+
+        var reg =  /<script[^>]*>([^\x00]+)$/i;
+        //对整段HTML片段按<\/script>拆分
+        var htmlBlock = html.split("<\/script>");
+        for (var i in htmlBlock)
+        {
+            var blocks;//匹配正则表达式的内容数组，blocks[1]就是真正的一段脚本内容，因为前面reg定义我们用了括号进行了捕获分组
+            if (blocks = htmlBlock[i].match(reg))
+            {
+                //清除可能存在的注释标记，对于注释结尾-->可以忽略处理，eval一样能正常工作
+                var code = blocks[1].replace(/<!--/, '');
+                try
+                {
+                    eval(code) //执行脚本
+                }
+                catch (e)
+                {
+                }
+            }
+        }
+    }
+    function Value(id) {
+        $("#id1").val(id);
+    }
+    function showAtRight(url) {
+        var xmlHttp;
+
+        if (window.XMLHttpRequest) {
+            // code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlHttp=new XMLHttpRequest();    //创建 XMLHttpRequest对象
+        }
+        else {
+            // code for IE6, IE5
+            xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        xmlHttp.onreadystatechange=function() {
+            //onreadystatechange — 当readystate变化时调用后面的方法
+
+            if (xmlHttp.readyState == 4) {
+                //xmlHttp.readyState == 4    ——    finished downloading response
+
+                if (xmlHttp.status == 200) {
+                    //xmlHttp.status == 200        ——    服务器反馈正常
+
+                    document.getElementById("content").innerHTML=xmlHttp.responseText;    //重设页面中id="content"的div里的内容
+                    //alert(xmlHttp.responseText);
+                    executeScript(xmlHttp.responseText);    //执行从服务器返回的页面内容里包含的JavaScript函数
+                }
+                //错误状态处理
+                else if (xmlHttp.status == 404){
+                    alert("出错了☹   （错误代码：404 Not Found），……！");
+                    /* 对404的处理 */
+                    return;
+                }
+                else if (xmlHttp.status == 403) {
+                    alert("出错了☹   （错误代码：403 Forbidden），……");
+                    /* 对403的处理  */
+                    return;
+                }
+                else {
+                    alert("出错了☹   （错误代码：" + request.status + "），……");
+                    /* 对出现了其他错误代码所示错误的处理   */
+                    return;
+                }
+            }
+
+        }
+
+        //把请求发送到服务器上的指定文件（url指向的文件）进行处理
+        xmlHttp.open("GET", url, true);        //true表示异步处理
+        xmlHttp.send();
+    }
+
+
+   $(document).ready(function () {
+       $('ul.nav > li').click(function (e) {
+           //e.preventDefault();    加上这句则导航的<a>标签会失效
+           $('ul.nav > li').removeClass('active');
+           $(this).addClass('active');
+       });
+   });
+    function DeleteByIds(id) {
+        $.ajax({
+            url:'/deleteStudent/'+id,
+            type:'post',
+            success:function(data){
+                //alert("success");
+                $('#table').bootstrapTable('refresh',{
+                    url:　"/showStudent",
+                    silent: true
+                });
+            },
+            error:function(reason){
+                console.log(reason)
+            }
+        });
+
+    }
+    //删除按钮
+    function DeleteByIds1(id) {
+
+        $.ajax({
+            url:'/deleteScore/'+id,
+            type:'post',
+            success:function(data){
+                //alert("success");
+                $('#table').bootstrapTable('refresh',{
+                    url:　"/showScore",
+                    silent: true
+                });
+            },
+            error:function(reason){
+            }
+        });
+    }
+    //学生页显示具体内容（查）
+    function EditViewById(id) {
+
+        $.ajax({
+            url:'/selectStudent/'+id,
+            type:'post',
+            success:function(data){
+                alert(data);
+            },
+            error:function(reason){
+            }
+        });
+    }
+    //成绩页面显示具体内容
+    function EditViewById1(id) {
+
+        $.ajax({
+            url:'/selectScore/'+id,
+            type:'post',
+            success:function(data){
+                alert(data);
+            },
+            error:function(reason){
+            }
+        });
+    }
+</script>
+</body>
+</html>
